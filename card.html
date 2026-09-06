@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Business Card</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center py-10 px-4">
+
+    <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-200 flex flex-col items-center text-center">
+        
+        <h1 class="text-xl font-bold text-slate-800 mb-6">Digital Business Card</h1>
+
+        <!-- Virtual Card Visual Display -->
+        <div id="cardBox" class="text-white p-6 rounded-2xl shadow-xl w-full text-left space-y-3 relative overflow-hidden mb-6 transition-all duration-300">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+            
+            <!-- Logo Container -->
+            <div id="logoContainer" class="mb-3 hidden">
+                <img id="outLogo" src="" alt="Logo" class="w-12 h-12 object-contain rounded-lg bg-white/10 p-1 backdrop-blur-sm">
+            </div>
+
+            <h3 id="outName" class="text-2xl font-bold tracking-tight"></h3>
+            <p id="outTitle" class="text-white/80 text-sm font-medium"></p>
+            <div id="cardDivider" class="pt-4 space-y-2 text-sm border-t text-white/90">
+                <p id="outPhone">📱 </p>
+                <p id="outEmail">✉️ </p>
+                <p id="outWebsite">🌐 </p>
+            </div>
+        </div>
+
+        <!-- Action Button to Save Contact -->
+        <div class="w-full space-y-3">
+            <button id="saveBtn" onclick="downloadVCard()" class="w-full text-white font-semibold py-3.5 px-4 rounded-xl shadow transition duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                <span>👤</span> Save Contact (.vcf)
+            </button>
+        </div>
+        
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+
+        let cardData = {
+            name: urlParams.get('name') || "Jorge Aguilar-Teuffer",
+            title: urlParams.get('title') || "Independent Contractor",
+            phone: urlParams.get('phone') || "+15550192834",
+            email: urlParams.get('email') || "jorge@example.com",
+            website: urlParams.get('website') || "https://example.com",
+            logo: urlParams.get('logo') || "",
+            theme: urlParams.get('theme') || "midnight"
+        };
+
+        const themes = {
+            midnight: {
+                cardClass: "bg-gradient-to-br from-slate-900 to-indigo-950",
+                dividerClass: "border-slate-700/60",
+                btnClass: "bg-indigo-600 hover:bg-indigo-700"
+            },
+            emerald: {
+                cardClass: "bg-gradient-to-br from-emerald-950 to-teal-900",
+                dividerClass: "border-emerald-700/60",
+                btnClass: "bg-emerald-600 hover:bg-emerald-700"
+            },
+            sunset: {
+                cardClass: "bg-gradient-to-br from-rose-950 to-amber-950",
+                dividerClass: "border-rose-700/60",
+                btnClass: "bg-rose-600 hover:bg-rose-700"
+            },
+            purple: {
+                cardClass: "bg-gradient-to-br from-purple-950 to-slate-950",
+                dividerClass: "border-purple-700/60",
+                btnClass: "bg-purple-600 hover:bg-purple-700"
+            },
+            slate: {
+                cardClass: "bg-gradient-to-br from-slate-800 to-slate-900",
+                dividerClass: "border-slate-600/60",
+                btnClass: "bg-slate-700 hover:bg-slate-800"
+            }
+        };
+
+        // Apply theme styles
+        const selectedTheme = themes[cardData.theme] || themes.midnight;
+        document.getElementById('cardBox').className += ` ${selectedTheme.cardClass}`;
+        document.getElementById('cardDivider').className += ` ${selectedTheme.dividerClass}`;
+        document.getElementById('saveBtn').className += ` ${selectedTheme.btnClass}`;
+
+        // Render Logo if provided
+        if (cardData.logo) {
+            document.getElementById('outLogo').src = cardData.logo;
+            document.getElementById('logoContainer').classList.remove('hidden');
+        }
+
+        // Render card text info
+        document.getElementById('outName').innerText = cardData.name;
+        document.getElementById('outTitle').innerText = cardData.title;
+        document.getElementById('outPhone').innerText = `📱 ${cardData.phone}`;
+        document.getElementById('outEmail').innerText = `✉️ ${cardData.email}`;
+        document.getElementById('outWebsite').innerText = `🌐 ${cardData.website.replace('https://','').replace('http://','')}`;
+
+        function downloadVCard() {
+            const nameParts = cardData.name.split(" ");
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            const vcard = [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                `N:${lastName};${firstName};;;`,
+                `FN:${cardData.name}`,
+                `TITLE:${cardData.title}`,
+                `TEL;TYPE=CELL:${cardData.phone}`,
+                `EMAIL:${cardData.email}`,
+                `URL:${cardData.website}`,
+                "END:VCARD"
+            ].join("\n");
+
+            const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${cardData.name.replace(/\s+/g, '_')}_card.vcf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
