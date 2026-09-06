@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Digital Business Card</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QRCode.js library for dynamic code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen py-10 px-4">
+    <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+        
+        <!-- Input Form Panel -->
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+            <h2 class="text-xl font-bold mb-4 text-slate-800">Card Information</h2>
+            <form id="cardForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Full Name</label>
+                    <input type="text" id="name" value="John Smith" class="mt-1 w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Job Title & Company</label>
+                    <input type="text" id="title" value="Independent Contractor" class="mt-1 w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Phone Number</label>
+                    <input type="tel" id="phone" value="+15550192834" class="mt-1 w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Email Address</label>
+                    <input type="email" id="email" value="john@example.com" class="mt-1 w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Website / Portfolio URL</label>
+                    <input type="url" id="website" value="https://example.com" class="mt-1 w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+            </form>
+            <p class="text-xs text-slate-400 mt-4">Tip: Edit fields above to customize your card in real time.</p>
+        </div>
+
+        <!-- Live Preview & Share Panel -->
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex flex-col items-center text-center justify-between">
+            <div class="w-full flex flex-col items-center">
+                <h2 class="text-xl font-bold mb-4 text-slate-800">Live Preview</h2>
+                
+                <!-- Digital Business Card Styling -->
+                <div id="cardPreview" class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-6 rounded-2xl shadow-xl w-72 text-left space-y-3 relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+                    <h3 id="prevName" class="text-2xl font-bold tracking-tight">Jorge Aguilar-Teuffer</h3>
+                    <p id="prevTitle" class="text-blue-300 text-sm font-medium">Independent Contractor</p>
+                    <div class="pt-4 space-y-2 text-sm border-t border-slate-700/60 text-slate-200">
+                        <p id="prevPhone">📱 +15550192834</p>
+                        <p id="prevEmail">✉️ jorge@example.com</p>
+                        <p id="prevWebsite">🌐 example.com</p>
+                    </div>
+                </div>
+
+                <!-- Save Contact Button -->
+                <button onclick="downloadVCard()" class="mt-5 w-72 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                    <span>👤</span> Save Contact (.vcf)
+                </button>
+            </div>
+
+            <!-- Dynamic QR Code Container -->
+            <div class="mt-8">
+                <div id="qrcode" class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm inline-block"></div>
+                <p class="text-xs text-slate-500 mt-2 font-medium">Scan QR Code or Tap NFC</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        const form = document.getElementById('cardForm');
+        const qrcodeContainer =ிட document.getElementById('qrcode');
+        
+        function updateCard() {
+            const name = document.getElementById('name').value;
+            const title = document.getElementById('title').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const website = document.getElementById('website').value;
+
+            // Update Text Elements in Preview
+            document.getElementById('prevName').innerText = name || "Your Name";
+            document.getElementById('prevTitle').innerText = title || "Job Title";
+            document.getElementById('prevPhone').innerText = `📱 ${phone || "Phone"}`;
+            document.getElementById('prevEmail').innerText = `✉️ ${email || "Email"}`;
+            document.getElementById('prevWebsite').innerText = `🌐 ${(website || "").replace('https://','').replace('http://','')}`;
+
+            // Refresh QR Code to point to the live page URL (or fallback website)
+            qrcodeContainer.innerHTML = "";
+            new QRCode(qrcodeContainer, {
+                text: window.location.href.startsWith("http") ? window.location.href : (website || "https://aguilamedia.github.io/business-card/"),
+                width: 110,
+                height: 110
+            });
+        }
+
+        function downloadVCard() {
+            const name = document.getElementById('name').value;
+            const title = document.getElementById('title').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const website = document.getElementById('website').value;
+
+            const nameParts = name.trim().split(" ");
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            // Standard vCard 3.0 formatting string
+            const vcard = [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                `N:${lastName};${firstName};;;`,
+                `FN:${name}`,
+                `TITLE:${title}`,
+                `TEL;TYPE=CELL:${phone}`,
+                `EMAIL:${email}`,
+                `URL:${website}`,
+                "END:VCARD"
+            ].join("\n");
+
+            // Trigger browser download mechanism
+            const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${name.replace(/\s+/g, '_')}_card.vcf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        form.addEventListener('input', updateCard);
+        window.addEventListener('load', updateCard);
+    </script>
+</body>
+</html>
